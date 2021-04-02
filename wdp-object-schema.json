@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "http://nglp.org/schemas/journal.json",
+  "title": "WDP Content Schema",
+  "description": "A Content Schema used by the NGLP Web Delivery Platform",
+  "type": "object",
+
+  "definitions": {
+    "path": {
+      "description": "A path can reference a schema property or a core property of an object. Schema properties begin with `schema.`.",
+      "type": "string"
+    },
+    "order": {
+      "description": "Describes how to order a view",
+      "type": "object",
+      "properties": {
+        "path": { "$ref": "#/definitions/path" },
+        "direction": {
+          "type": "string",
+          "enum": ["asc", "desc"]
+        }
+      }
+    },
+    "view": {
+      "description": "A views describes a way of listing objects.",
+      "type": "object",
+      "properties": {
+        "select": {
+          "type": "array",
+          "required": true,
+          "items": {
+            "type": "string",
+            "enum": ["children", "descendants", "linked:contained", "linked:referenced"]
+          }
+        },
+        "filter": {
+          "description": "Used to filter which children should be included in the view",
+          "type": "object",
+          "properties": {
+            "schemas": {
+              "description": "Limit the selection to objects that consume these schemas.",
+              "type": "array",
+              "items": {
+                "description": "These strings should be existing Schema IDs",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "order": {
+          "description": "Specifies how to order the view",
+          "type": "array",
+          "items": { "$ref": "#/definitions/order" },
+          "required": true
+        }
+      }
+    }
+  },
+  "properties": {
+    "id": {
+      "description": "A unique identifier that identifies this schema within the WDP",
+      "type": "string",
+      "required": true
+    },
+    "label": {
+      "description": "A human readable label that can be used to reference this schema",
+      "type": "string",
+      "required": true
+    },
+    "version": {
+      "description": "A version number for the schema in the major.minor.patch format. Our versioning is similar to semantic versions, without pre-release and version metadata segments.",
+      "type": "string",
+      "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$",
+      "required": true
+    },
+    "consumers": {
+      "description": "Lists the type of WDP models that can utilize this schema",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["collection", "item"]
+      },
+      "required": true,
+      "minItems": 1
+    },
+    "views": {
+      "description": "A schema should provide default views, which a consumer can override.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/view" },
+      "required": true
+    },
+    "attributes": {
+      "description": "Describes the attributes that wil be available for this schema",
+      "type": "array",
+      "required": true,
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "path": {
+              "description": "The name of this attribute",
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_]+$",
+              "required": true
+            },
+            "function": {
+              "type": "string",
+              "enum": ["presentation", "metadata", "content"]
+            },
+            "type": {
+              "description": "The type of the attribute. This will be used to render it on the FE and to render inputs on the BE.",
+              "type": "string",
+              "enum": ["string", "css", "richtext", "html", "markdown", "integer", "float", "array", "hash", "contributors", "boolean", "select", "image", "files"],
+              "required": true
+            },
+            "group": {
+              "description": "An arbitrary string that can be used to group form inputs into field sets",
+              "type": "string"
+            },
+            "mappings": {
+              "type": "array",
+              "description": "Mappings can be used in the future to map this attribute to accepted metadata standards",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "standard": {
+                    "type": "string",
+                    "enum": ["JATS", "OAI-PMH"]
+                  },
+                  "entity": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
